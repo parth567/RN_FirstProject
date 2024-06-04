@@ -56,7 +56,6 @@ import {
         // defaultValue="Please Enter your Input"
       />
       </View>
-   
   );
 }
 
