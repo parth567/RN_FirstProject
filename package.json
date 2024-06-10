@@ -12,8 +12,10 @@
     "debug": "cd ./android && ./gradlew clean && ./gradlew assembledebug"
   },
   "dependencies": {
+    "@react-native-community/slider": "^4.5.2",
     "react": "18.2.0",
-    "react-native": "0.74.1"
+    "react-native": "0.74.1",
+    "react-native-vector-icons": "^10.1.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
