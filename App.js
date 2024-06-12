@@ -1,18 +1,21 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, FlatList, Modal, Alert, TouchableOpacity, TextInput, Button } from 'react-native';
 import Icon from 'react-native-vector-icons/AntDesign';
+import SwipeableFlatList from 'react-native-swipeable-list';
+// import Test2 from './test/Test2'
+
 
 const TODO = () => {
+
   const [modalVisible, setModalVisible] = useState(false);
   const [inputValue, setInputValue] = useState('');
-  const [todo, setTodo] = useState("");
+  const [todo, setTodo] = useState([]);
 
 
   console.log(modalVisible);
   console.log("hiii");
   console.log("inputValue==>", inputValue);
   console.log("todo==>", todo);
-
 
   const Data = [
     {
@@ -68,27 +71,34 @@ const TODO = () => {
   const handleInputChange = (text) => {
     setInputValue(text);
   }
-  const submit = () => {
-    setTodo(inputValue);
+  const submit = (event) => {
+    // setTodo(inputValue);
+    // setTodo({...todo, [event.target.name]: event.target.value });
+    setTodo([...todo, { mytask: inputValue, },]);
     setModalVisible(!modalVisible)
     setInputValue('')
   }
+  console.log("todo===>", todo)
 
-
-  const Item = ({ Todo }) => (
-    <View style={styles.item}>
-      <Text style={styles.data}>{Todo}</Text>
-    </View>
-  );
+  const Item = ({ item, index }) => {
+    console.log("todo===>", index)
+    return (
+      // <Swipeable leftContent={leftContent} rightButtons={rightButtons}>
+        <View style={styles.item}>
+          <Text style={styles.data}>{item.mytask}</Text>
+        </View>
+        // </Swipeable>
+       )
+  };
 
   return (
     <View style={styles.container}>
       <View style={styles.list}>
         <Text style={styles.title}>Todo Task</Text>
         <FlatList
-          data={Data}
-          renderItem={({ item }) => <Item Todo={item.Todo} />}
-          // keyExtractor={item => item.id}
+          data={todo}
+          renderItem={({ item, index }) => <Item item={item} index={index} />}
+          // keyExtractor={(item, index) => index.toString()}
           style={styles.flatlist}
         />
 
@@ -131,8 +141,8 @@ const TODO = () => {
               />
             </View>
             <View style={{ flex: 0.3, }}>
-              <TouchableOpacity style={styles.button} >
-                <Text style={{color:'white',fontSize:18}}>Press Here</Text>
+              <TouchableOpacity style={styles.button} onPress={submit}>
+                <Text style={{ color: 'white', fontSize: 18 }}>Press Here</Text>
               </TouchableOpacity>
             </View>
 
@@ -160,20 +170,20 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 40,
     right: 18,
-    height:50,
-    width:50,
-    display:'flex',
-    justifyContent:'center',
-    alignSelf:'center',
+    height: 50,
+    width: 50,
+    display: 'flex',
+    justifyContent: 'center',
+    alignSelf: 'center',
     // // alignItems:'center',
     // alignContent:'center',
-    backgroundColor:'#02a8f4',
-    borderRadius:40,
+    backgroundColor: '#02a8f4',
+    borderRadius: 40,
 
   },
   icon: {
     // alignItems:'center',
-    alignSelf:'center'
+    alignSelf: 'center'
     // alignSelf: 'flex-end',
     // marginRight: 30,
 
@@ -234,8 +244,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#02a8f4',
     padding: 10,
-    borderRadius:5,
-    color:'white'
+    borderRadius: 5,
+    color: 'white'
   },
 });
 
