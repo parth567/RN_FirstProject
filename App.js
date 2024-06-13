@@ -1,21 +1,24 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, FlatList, Modal, Alert, TouchableOpacity, TextInput, Button } from 'react-native';
+import { StyleSheet, Text, View, FlatList, Modal, Alert, TouchableOpacity, TextInput, Button, Pressable } from 'react-native';
 import Icon from 'react-native-vector-icons/AntDesign';
 import SwipeableFlatList from 'react-native-swipeable-list';
 // import Test2 from './test/Test2'
 
 
 const TODO = () => {
-
   const [modalVisible, setModalVisible] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [todo, setTodo] = useState([]);
-
+  const [editingIndex, setEditingIndex] = useState(null);
+  const [editingData, setEditingData] = useState([]);
 
   console.log(modalVisible);
   console.log("hiii");
   console.log("inputValue==>", inputValue);
   console.log("todo==>", todo);
+  console.log("editingIndex==>", editingIndex);
+  console.log("editingData==>", editingData);
+
 
   const Data = [
     {
@@ -72,8 +75,6 @@ const TODO = () => {
     setInputValue(text);
   }
   const submit = (event) => {
-    // setTodo(inputValue);
-    // setTodo({...todo, [event.target.name]: event.target.value });
     setTodo([...todo, { mytask: inputValue, },]);
     setModalVisible(!modalVisible)
     setInputValue('')
@@ -83,23 +84,121 @@ const TODO = () => {
   const Item = ({ item, index }) => {
     console.log("todo===>", index)
     return (
-      // <Swipeable leftContent={leftContent} rightButtons={rightButtons}>
-        <View style={styles.item}>
-          <Text style={styles.data}>{item.mytask}</Text>
+      <View style={styles.item}>
+        <Text style={styles.data}>{item.mytask}</Text>
+      </View>
+    )
+  };
+
+  const Deletevalidation = (index) => {
+    Alert.alert(
+      'Delete',
+      "Are you sure you went to Delete this Item ?",
+      [
+        {
+          text: 'Yes',
+          onPress: () => deleteitem(index),
+          style: 'Yes',
+        },
+        {
+          text: 'Cancel',
+          onPress: () => console.log('Cancel Pressed'),
+          style: 'cancel',
+        },
+      ],
+    );
+  };
+  const Editvalidation = (index) => {
+    Alert.alert(
+      'Edit',
+      "Are you sure you went to Edit this Item ?",
+      [
+        {
+          text: 'Yes',
+          onPress: () => Edititem(index),
+          style: 'Yes',
+        },
+        {
+          text: 'Cancel',
+          onPress: () => console.log('Cancel Pressed'),
+          style: 'cancel',
+        },
+      ],
+    );
+  };
+
+  const Edititem = (index) => {
+    console.log("index", index)
+    setModalVisible(true)
+    setEditingIndex(index);
+
+    let find = todo[index];
+    console.log("find", find)
+    setInputValue(find.mytask);
+    setEditingData(find)
+  }
+
+  const editData = () => {
+    console.log("inputValue", inputValue);
+    const editdata = editingData;
+    const editindex = editingIndex;
+    console.log("editdata", editdata)
+    console.log("editindex", editindex)
+    let data = todo.splice(editindex, 1, {
+      mytask: inputValue
+    });
+
+    setEditingData([]);
+    setModalVisible(!modalVisible)
+  }
+
+  const deleteitem = (index) => {
+    const Delete = [...todo]
+    console.log("index", index)
+    console.log("todo", todo)
+    Delete.splice(index, 1);
+    // console.log("deletedata", deletedata)
+    setTodo(Delete);
+  }
+
+  const QuickActions = (index,) => {
+    return (
+      <View style={styles.qaContainer}>
+        <View style={[styles.buttonn, styles.button1]}>
+          <Pressable >
+            <Icon
+              name='edit'
+              size={30}
+              color='white'
+              style={styles.iconEdit}
+              onPress={() => Editvalidation(index)} />
+          </Pressable>
         </View>
-        // </Swipeable>
-       )
+        <View style={[styles.buttonn, styles.button2]}>
+          <Pressable >
+            <Icon
+              name='delete'
+              size={30}
+              color='white'
+              style={styles.iconDelete}
+              onPress={() => Deletevalidation(index)} />
+          </Pressable>
+        </View>
+      </View>
+    );
   };
 
   return (
     <View style={styles.container}>
       <View style={styles.list}>
         <Text style={styles.title}>Todo Task</Text>
-        <FlatList
+        <SwipeableFlatList
           data={todo}
           renderItem={({ item, index }) => <Item item={item} index={index} />}
-          // keyExtractor={(item, index) => index.toString()}
+          keyExtractor={(item, index) => index.toString()}
           style={styles.flatlist}
+          maxSwipeDistance={114}
+          renderQuickActions={({ index, item }) => QuickActions(index, item)}
         />
 
       </View>
@@ -109,7 +208,7 @@ const TODO = () => {
           size={36}
           color='white'
           style={styles.icon}
-          onPress={() => setModalVisible(true)} />
+          onPress={() => { setModalVisible(true); setInputValue(''); setEditingData('') }} />
       </View>
       <Modal
         animationType="slide"
@@ -137,19 +236,24 @@ const TODO = () => {
                 placeholder="Please Enter your Task"
                 keyboardType="default"
                 value={inputValue}
+                // value={editingData == '' ? inputValue : editingData.mytask}
+                // value={editingData.mytask}
                 onChangeText={handleInputChange}
               />
             </View>
             <View style={{ flex: 0.3, }}>
-              <TouchableOpacity style={styles.button} onPress={submit}>
-                <Text style={{ color: 'white', fontSize: 18 }}>Press Here</Text>
-              </TouchableOpacity>
+              {editingData == '' ?
+                <TouchableOpacity style={styles.button} onPress={submit}>
+                  <Text style={{ color: 'white', fontSize: 18, padding: 5 }}>Submit</Text>
+                </TouchableOpacity> :
+                <TouchableOpacity style={styles.button} onPress={editData}>
+                  <Text style={{ color: 'white', fontSize: 18, padding: 5 }}>Edit</Text>
+                </TouchableOpacity>
+              }
             </View>
 
           </TouchableOpacity>
-
         </TouchableOpacity>
-
       </Modal>
     </View>
   );
@@ -183,15 +287,17 @@ const styles = StyleSheet.create({
   },
   icon: {
     // alignItems:'center',
-    alignSelf: 'center'
+    alignSelf: 'center',
     // alignSelf: 'flex-end',
     // marginRight: 30,
+    // backgroundColor:'red'
 
   }, item: {
     backgroundColor: '#d3d3d3',
     padding: 20,
     marginVertical: 8,
-    marginHorizontal: 16,
+    marginLeft:16,
+    // marginHorizontal: 16,
     borderRadius: 10
   },
   data: {
@@ -243,10 +349,53 @@ const styles = StyleSheet.create({
   button: {
     alignItems: 'center',
     backgroundColor: '#02a8f4',
-    padding: 10,
+    padding: 6,
     borderRadius: 5,
+    // backgroundColor:'blue'
     color: 'white'
   },
+  qaContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+
+  },
+  buttonn: {
+    marginTop:10,
+    width: 60,
+    height:64,
+    alignItems: 'center',
+    justifyContent: 'center',
+    // backgroundColor:'red',
+    // borderRadius:3,
+
+  },
+  buttonText: {
+    fontWeight: 'bold',
+    // opacity: colorEmphasis.high,
+  },
+  button1: {
+    backgroundColor:'#02a8f4',
+    borderTopLeftRadius:10,
+    borderBottomLeftRadius:10,
+    // color: darkColors.primary,
+  },
+  button2: {
+    backgroundColor:'red',
+    borderTopRightRadius:10,
+    borderBottomRightRadius:10,  
+    // color: darkColors.secondary,
+  },
+  // button3Text: {
+  //   // color: darkColors.error,
+  // },
+  // contentContainerStyle: {
+  //   flexGrow: 1,
+  //   // backgroundColor: darkColors.backgroundColor,
+  // },
+  // iconEdit: {
+  //   left: 25,
+  // }
 });
 
 export default TODO;
